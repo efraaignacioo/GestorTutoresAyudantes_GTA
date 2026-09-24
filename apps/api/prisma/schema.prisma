@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  PROFESSOR
+  ASSISTANT
+}
+
+enum AssistantStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum LogStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         Role     @default(ASSISTANT)
+
+  coursesTeaching Course[]          @relation("ProfessorCourses")
+  assignments     CourseAssistant[] @relation("AssistantAssignments")
+  reviewedLogs    TimeLog[]         @relation("ReviewedLogs")
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("users")
+}
+
+model Course {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        String
+  name        String
+  term        String
+  professorId String   @db.Uuid
+  professor   User     @relation("ProfessorCourses", fields: [professorId], references: [id], onDelete: Restrict)
+
+  assistants CourseAssistant[]
+
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(3)
+
+  @@unique([code, term])
+  @@map("courses")
+}
+
+model CourseAssistant {
+  id          String          @id @default(uuid()) @db.Uuid
+  courseId    String          @db.Uuid
+  assistantId String          @db.Uuid
+  maxHours    Int             @default(20)
+  status      AssistantStatus @default(ACTIVE)
+
+  course    Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  assistant User      @relation("AssistantAssignments", fields: [assistantId], references: [id], onDelete: Cascade)
+  timeLogs  TimeLog[]
+
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(3)
+
+  @@unique([courseId, assistantId])
+  @@index([courseId])
+  @@index([assistantId])
+  @@map("course_assistants")
+}
+
+model TimeLog {
+  id                String          @id @default(uuid()) @db.Uuid
+  courseAssistantId String          @db.Uuid
+  courseAssistant   CourseAssistant @relation(fields: [courseAssistantId], references: [id], onDelete: Cascade)
+
+  date            DateTime  @db.Date
+  hours           Decimal   @db.Decimal(4, 2)
+  description     String
+  status          LogStatus @default(PENDING)
+
+  reviewedById    String?   @db.Uuid
+  reviewedBy      User?     @relation("ReviewedLogs", fields: [reviewedById], references: [id], onDelete: SetNull)
+  rejectionReason String?
+
+  createdAt       DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @db.Timestamptz(3)
+
+  @@index([courseAssistantId, date])
+  @@map("time_logs")
+}
