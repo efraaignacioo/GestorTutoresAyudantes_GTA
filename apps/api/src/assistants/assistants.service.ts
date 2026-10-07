@@ -6,6 +6,7 @@ import {
 import { PrismaService } from "../prisma/prisma.service.js";
 import { AssignCourseDto } from "./dto/assign-course.dto.js";
 import { CreateAssistantDto } from "./dto/create-assistant.dto.js";
+import { CreateTimeLogDto } from "./dto/create-time-log.dto.js";
 import { ListAssistantsQueryDto } from "./dto/list-assistants-query.dto.js";
 import { UpdateAssistantDto } from "./dto/update-assistant.dto.js";
 
@@ -162,6 +163,33 @@ export class AssistantsService {
       include: {
         course: { select: { id: true, code: true, name: true, term: true } },
         timeLogs: true,
+      },
+    });
+  }
+
+  async createTimeLog(
+    assistantId: string,
+    assignmentId: string,
+    dto: CreateTimeLogDto,
+  ) {
+    await this.findOne(assistantId);
+
+    const assignment = await this.prisma.courseAssistant.findFirst({
+      where: { id: assignmentId, assistantId },
+      select: { id: true },
+    });
+    if (!assignment) {
+      throw new NotFoundException(
+        "La asignación indicada no existe para este ayudante",
+      );
+    }
+
+    return this.prisma.timeLog.create({
+      data: {
+        courseAssistantId: assignment.id,
+        date: new Date(`${dto.date}T00:00:00.000Z`),
+        hours: dto.hours,
+        description: dto.description,
       },
     });
   }

@@ -22,6 +22,7 @@ import {
 import { AssistantsService } from "./assistants.service.js";
 import { AssignCourseDto } from "./dto/assign-course.dto.js";
 import { CreateAssistantDto } from "./dto/create-assistant.dto.js";
+import { CreateTimeLogDto } from "./dto/create-time-log.dto.js";
 import { ListAssistantsQueryDto } from "./dto/list-assistants-query.dto.js";
 import { UpdateAssistantDto } from "./dto/update-assistant.dto.js";
 
@@ -105,5 +106,27 @@ export class AssistantsController {
   @ApiNotFoundResponse({ description: "Ayudante no encontrado" })
   getAssignments(@Param("id", new ParseUUIDPipe({ version: "4" })) id: string) {
     return this.assistantsService.getAssignments(id);
+  }
+
+  @Post(":id/assignments/:assignmentId/time-logs")
+  @ApiOperation({ summary: "Registrar horas trabajadas en una asignación" })
+  @ApiParam({ name: "id", format: "uuid", description: "UUID del ayudante" })
+  @ApiParam({
+    name: "assignmentId",
+    format: "uuid",
+    description: "UUID de la asignación",
+  })
+  @ApiCreatedResponse({ description: "Registro de horas creado" })
+  @ApiBadRequestResponse({
+    description: "UUID, fecha, horas o descripción inválidos",
+  })
+  @ApiNotFoundResponse({ description: "Ayudante o asignación no encontrada" })
+  createTimeLog(
+    @Param("id", new ParseUUIDPipe({ version: "4" })) id: string,
+    @Param("assignmentId", new ParseUUIDPipe({ version: "4" }))
+    assignmentId: string,
+    @Body() dto: CreateTimeLogDto,
+  ) {
+    return this.assistantsService.createTimeLog(id, assignmentId, dto);
   }
 }
