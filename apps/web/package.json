@@ -4,10 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host localhost --port 5173 --strictPort",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview --host localhost --port 4173 --strictPort",
+    "test": "node --test tests/course-contract.test.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "5.102.8",
