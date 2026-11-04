@@ -4,8 +4,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiErrorMessage } from "./api-error.ts";
 import { createCourse, listCourses } from "./courses/courses.api.ts";
 import { createCourseInput, PAGE_SIZE } from "./courses/course-contract.ts";
+import { getSession } from "./auth/session-store.ts";
+import type { Session } from "./auth/session-store.ts";
 
-export default function App() {
+export default function App({
+  session,
+  onLogout,
+}: {
+  session: Session;
+  onLogout: () => void;
+}) {
   const client = useQueryClient();
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
@@ -14,14 +22,17 @@ export default function App() {
   const [feedback, setFeedback] = useState("");
   const [inputError, setInputError] = useState("");
 
+  const scope = ["courses", session.user.sub, session.id] as const;
+
   const coursesQuery = useQuery({
-    queryKey: ["courses", { skip, take: PAGE_SIZE }],
+    queryKey: [...scope, { skip, take: PAGE_SIZE }],
     queryFn: ({ signal }) => listCourses(skip, PAGE_SIZE, signal),
   });
 
   const createMutation = useMutation({
     mutationFn: createCourse,
     onSuccess: async () => {
+      if (getSession()?.id !== session.id) return;
       setCode("");
       setName("");
       setTerm("");
@@ -30,7 +41,7 @@ export default function App() {
         "Asignatura creada. Si el listado no se actualiza, reintenta solo la lectura.",
       );
       setSkip(0);
-      await client.invalidateQueries({ queryKey: ["courses"] });
+      await client.invalidateQueries({ queryKey: scope });
     },
   });
 
@@ -70,12 +81,11 @@ export default function App() {
       <header>
         <p className="eyebrow">Gestor de Tutores y Ayudantes</p>
         <h1>Asignaturas y Ramos</h1>
-        <p>
-          Consulta y registra asignaturas asociadas al docente de demostración.
-        </p>
-        <p className="notice">
-          Entorno didáctico sin inicio de sesión. No ingresar datos sensibles.
-        </p>
+        <p>Sesión de {session.user.name || session.user.email}</p>
+        <p className="muted">{session.user.email}</p>
+        <button type="button" onClick={onLogout}>
+          Cerrar sesión
+        </button>
       </header>
 
       <section aria-labelledby="create-heading">
@@ -174,7 +184,7 @@ export default function App() {
 
       <section aria-labelledby="list-heading">
         <div className="section-heading">
-          <h2 id="list-heading">Asignaturas registradas</h2>
+          <h2 id="list-heading">Mis asignaturas</h2>
           <button
             type="button"
             onClick={() => void coursesQuery.refetch()}
@@ -194,7 +204,7 @@ export default function App() {
             <p>{apiErrorMessage(coursesQuery.error)}</p>
             <p>
               {courses
-                ? "Se muestran datos de una lectura anterior; podrían estar desactualizados."
+                ? "Se muestran datos anteriores de esta cuenta; podrían estar desactualizados."
                 : "No se pudo consultar esta página. El error no significa que no existan asignaturas."}
             </p>
           </div>
@@ -211,7 +221,7 @@ export default function App() {
           )}
 
         {courses && courses.length > 0 && (
-          <ul className="task-list" aria-label="Listado de asignaturas">
+          <ul className="task-list" aria-label="Listado de mis asignaturas">
             {courses.map((course) => (
               <li key={course.id}>
                 <strong>

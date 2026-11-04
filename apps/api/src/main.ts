@@ -13,40 +13,47 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-      transformOptions: {
-        enableImplicitConversion: false,
-      },
+      transformOptions: { enableImplicitConversion: false },
     }),
   );
 
   app.enableCors({
     origin: process.env.WEB_ORIGIN ?? "http://localhost:5173",
-    methods: ["GET", "HEAD", "POST", "PATCH", "DELETE"],
+    methods: ["GET", "HEAD", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: false,
   });
 
-  // Dentro de openApiConfig en apps/api/src/main.ts:
-  const openApiConfig = new DocumentBuilder()
+  const config = new DocumentBuilder()
     .setTitle("Gestor Tutores Ayudantes API")
-    .setDescription(
-      "API REST del sistema de gestión de ayudantías y seguimiento de horas",
-    )
-    .setVersion("2.0")
-    .addTag("courses", "Operaciones sobre asignaturas y ramos")
+    .setDescription("Sistema de gestión de asignaturas, ayudantías y horas")
+    .setVersion("4.0")
+    .addTag("auth", "Registro, acceso e identidad actual")
+    .addTag("courses", "CRUD de asignaturas por usuario autenticado")
     .addTag(
       "assistants",
       "Operaciones sobre ayudantes y asignación de carga horaria",
     )
+    .addBearerAuth(
+      { type: "http", scheme: "bearer", bearerFormat: "JWT" },
+      "access-token",
+    )
     .build();
 
-  const documentFactory = () =>
-    SwaggerModule.createDocument(app, openApiConfig);
-  SwaggerModule.setup("api/docs", app, documentFactory, {
-    jsonDocumentUrl: "api/docs-json",
-  });
+  SwaggerModule.setup(
+    "api/docs",
+    app,
+    () => SwaggerModule.createDocument(app, config),
+    {
+      jsonDocumentUrl: "api/docs-json",
+      swaggerOptions: { persistAuthorization: false },
+    },
+  );
 
   const port = Number(process.env.PORT ?? 3000);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error("PORT debe ser un puerto válido.");
+  }
   await app.listen(port);
 }
 void bootstrap();
