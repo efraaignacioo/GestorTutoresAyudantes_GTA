@@ -36,11 +36,9 @@ export class CoursesService {
         professorId,
       },
     });
-
     if (!course) {
       throw new NotFoundException("Asignatura no encontrada.");
     }
-
     return course;
   }
 
