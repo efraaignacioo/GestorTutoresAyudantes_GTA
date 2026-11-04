@@ -35,8 +35,9 @@ export class AuthService {
       dto.password,
       user?.passwordHash,
     );
-    if (!user || !matches)
+    if (!user || !matches) {
       throw new UnauthorizedException("Credenciales inválidas.");
+    }
     return this.issue(user.id);
   }
 }

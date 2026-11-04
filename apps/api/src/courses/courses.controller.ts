@@ -11,7 +11,17 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiResponse, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard.js";
 import { CurrentUser } from "../auth/current-user.decorator.js";
 import type { AuthUser } from "../auth/auth-user.js";
@@ -30,24 +40,29 @@ export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
   @Post()
+  @ApiOperation({ summary: "Crear una asignatura o ramo" })
+  @ApiCreatedResponse({ description: "Asignatura creada" })
+  @ApiBadRequestResponse({ description: "Cuerpo de solicitud inválido" })
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateCourseDto) {
     return this.coursesService.create(user.sub, dto);
   }
 
   @Get()
-@Header("Cache-Control", "no-store")
-findAll(
-  @CurrentUser() user: AuthUser,
-  @Query() query: ListCoursesQueryDto,
-) {
-  return this.coursesService.findAll(user.sub, {
-    skip: query.skip,
-    take: query.take,
-  });
-}
+  @Header("Cache-Control", "no-store")
+  @ApiOperation({ summary: "Listar asignaturas del docente autenticado" })
+  @ApiOkResponse({ description: "Listado paginado de asignaturas" })
+  @ApiBadRequestResponse({ description: "Parámetros de paginación inválidos" })
+  findAll(@CurrentUser() user: AuthUser, @Query() query: ListCoursesQueryDto) {
+    return this.coursesService.findAll(user.sub, query);
+  }
 
   @Get(":id")
   @Header("Cache-Control", "no-store")
+  @ApiOperation({ summary: "Obtener una asignatura por UUID" })
+  @ApiParam({ name: "id", format: "uuid" })
+  @ApiOkResponse({ description: "Asignatura encontrada" })
+  @ApiBadRequestResponse({ description: "UUID inválido" })
+  @ApiNotFoundResponse({ description: "Asignatura no encontrada" })
   findOne(
     @CurrentUser() user: AuthUser,
     @Param("id", new ParseUUIDPipe({ version: "4" })) id: string,
@@ -65,6 +80,11 @@ findAll(
   }
 
   @Delete(":id")
+  @ApiOperation({ summary: "Eliminar una asignatura" })
+  @ApiParam({ name: "id", format: "uuid" })
+  @ApiOkResponse({ description: "Asignatura eliminada" })
+  @ApiBadRequestResponse({ description: "UUID inválido" })
+  @ApiNotFoundResponse({ description: "Asignatura no encontrada" })
   remove(
     @CurrentUser() user: AuthUser,
     @Param("id", new ParseUUIDPipe({ version: "4" })) id: string,

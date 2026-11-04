@@ -128,3 +128,11 @@ a:focus-visible {
 .pagination {
   margin-top: 1rem;
 }
+
+form input + label {
+  margin-top: 0.75rem;
+}
+
+section > button {
+  margin-top: 1rem;
+}

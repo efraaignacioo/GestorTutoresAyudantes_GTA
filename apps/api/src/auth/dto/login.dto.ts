@@ -19,8 +19,8 @@ export class LoginDto {
 
   @ApiProperty({ writeOnly: true, maxLength: 72 })
   @IsString()
-  @MaxLength(72)
   @MinLength(1)
+  @MaxLength(72)
   @IsByteLength(1, 72)
   password!: string;
 }

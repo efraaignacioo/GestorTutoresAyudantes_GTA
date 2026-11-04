@@ -16,8 +16,15 @@ export class UsersService {
   async create(dto: SignupDto) {
     const passwordHash = await this.passwords.hash(dto.password);
     try {
+      const fallbackName =
+        dto.name?.trim() || dto.email.split("@")[0] || "Usuario";
       return await this.prisma.user.create({
-        data: { email: dto.email, name: dto.name ?? "", passwordHash },
+        data: {
+          email: dto.email,
+          name: fallbackName,
+          passwordHash,
+          role: "PROFESSOR",
+        },
         select: publicUserSelect,
       });
     } catch (error) {

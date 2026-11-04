@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "../generated/prisma/client.js";
 import { PrismaService } from "../prisma/prisma.service.js";
 import type { CreateCourseDto } from "./dto/create-course.dto.js";
+import type { ListCoursesQueryDto } from "./dto/list-courses-query.dto.js";
 import type { UpdateCourseDto } from "./dto/update-course.dto.js";
-import type { ListCoursesQueryDto } from "./dto/list-courses-query.dto.js"; // O el DTO de paginación que uses para courses
 
 @Injectable()
 export class CoursesService {
@@ -20,7 +20,7 @@ export class CoursesService {
     });
   }
 
-  findAll(professorId: string, query: { skip: number; take: number }) {
+  findAll(professorId: string, query: ListCoursesQueryDto) {
     return this.prisma.course.findMany({
       where: { professorId },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -31,7 +31,10 @@ export class CoursesService {
 
   async findOne(professorId: string, id: string) {
     const course = await this.prisma.course.findFirst({
-      where: { id, professorId },
+      where: {
+        id,
+        professorId,
+      },
     });
     if (!course) {
       throw new NotFoundException("Asignatura no encontrada.");
@@ -42,12 +45,11 @@ export class CoursesService {
   async update(professorId: string, id: string, dto: UpdateCourseDto) {
     try {
       return await this.prisma.course.update({
-        where: { id, professorId },
-        data: {
-          code: dto.code,
-          name: dto.name,
-          term: dto.term,
+        where: {
+          id,
+          professorId,
         },
+        data: dto,
       });
     } catch (error) {
       if (
@@ -62,7 +64,12 @@ export class CoursesService {
 
   async remove(professorId: string, id: string) {
     try {
-      await this.prisma.course.delete({ where: { id, professorId } });
+      await this.prisma.course.delete({
+        where: {
+          id,
+          professorId,
+        },
+      });
       return { ok: true, id };
     } catch (error) {
       if (

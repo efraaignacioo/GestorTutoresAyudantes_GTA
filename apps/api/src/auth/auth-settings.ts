@@ -14,7 +14,7 @@ export function readAuthSettings(
   if (!secret || new TextEncoder().encode(secret).length < 32) {
     throw new Error("JWT_SECRET debe contener al menos 32 bytes aleatorios.");
   }
-  if (secret === "PEGA_AQUI_EL_RESULTADO_ALEATORIO") {
+  if (secret === "PEGAR_AQUI_EL_RESULTADO_ALEATORIO") {
     throw new Error(
       "Reemplaza el marcador JWT_SECRET por un secreto aleatorio.",
     );
@@ -30,7 +30,7 @@ export function readAuthSettings(
   return {
     secret,
     expiresIn,
-    issuer: "gestor-api",
-    audience: "gestor-web",
+    issuer: "taskboard-api",
+    audience: "taskboard-web",
   };
 }
