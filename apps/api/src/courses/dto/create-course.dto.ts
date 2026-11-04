@@ -1,6 +1,6 @@
 import { Transform } from "class-transformer";
-import { IsNotEmpty, IsString, MaxLength } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateCourseDto {
   @ApiProperty({ example: "INF-210", description: "Código de la asignatura" })

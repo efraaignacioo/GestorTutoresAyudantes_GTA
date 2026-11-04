@@ -27,8 +27,9 @@ import { CurrentUser } from "../auth/current-user.decorator.js";
 import type { AuthUser } from "../auth/auth-user.js";
 import { CoursesService } from "./courses.service.js";
 import { CreateCourseDto } from "./dto/create-course.dto.js";
-import { ListCoursesQueryDto } from "./dto/list-courses-query.dto.js";
 import { UpdateCourseDto } from "./dto/update-course.dto.js";
+import { ListCoursesQueryDto } from "./dto/list-courses-query.dto.js";
+// Importa tu DTO de paginación de courses (ej: ListCoursesQueryDto)
 
 @ApiTags("courses")
 @ApiBearerAuth("access-token")
@@ -70,11 +71,6 @@ export class CoursesController {
   }
 
   @Patch(":id")
-  @ApiOperation({ summary: "Actualizar parcialmente una asignatura" })
-  @ApiParam({ name: "id", format: "uuid" })
-  @ApiOkResponse({ description: "Asignatura actualizada" })
-  @ApiBadRequestResponse({ description: "UUID o cuerpo de solicitud inválido" })
-  @ApiNotFoundResponse({ description: "Asignatura no encontrada" })
   update(
     @CurrentUser() user: AuthUser,
     @Param("id", new ParseUUIDPipe({ version: "4" })) id: string,
@@ -95,4 +91,5 @@ export class CoursesController {
   ) {
     return this.coursesService.remove(user.sub, id);
   }
+  
 }
