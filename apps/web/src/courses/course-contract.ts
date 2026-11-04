@@ -74,9 +74,9 @@ export function createCourseInput(data: {
       "El código debe tener entre 1 y 20 caracteres, sin espacios exteriores.",
     );
   }
-  if (name.length === 0 || name.length > 150) {
+  if (name.length === 0 || name.length > 200) {
     throw new Error(
-      "El nombre debe tener entre 1 y 150 caracteres, sin espacios exteriores.",
+      "El nombre debe tener entre 1 y 200 caracteres, sin espacios exteriores.",
     );
   }
   if (term.length === 0 || term.length > 20) {

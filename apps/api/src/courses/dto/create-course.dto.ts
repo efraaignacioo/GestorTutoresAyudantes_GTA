@@ -19,7 +19,7 @@ export class CreateCourseDto {
   @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
   @IsString()
   @IsNotEmpty()
-  @MaxLength(150)
+  @MaxLength(200)
   name!: string;
 
   @ApiProperty({
