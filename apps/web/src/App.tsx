@@ -57,7 +57,7 @@ export default function App({
     normalizedCode.length === 0 ||
     normalizedCode.length > 20 ||
     normalizedName.length === 0 ||
-    normalizedName.length > 150 ||
+    normalizedName.length > 200 ||
     normalizedTerm.length === 0 ||
     normalizedTerm.length > 20;
 
@@ -126,14 +126,14 @@ export default function App({
                 setFeedback("");
                 createMutation.reset();
               }}
-              maxLength={150}
+              maxLength={200}
               required
               disabled={busy}
               aria-describedby="name-help"
               placeholder="ej. Bases de Datos"
             />
             <p id="name-help" className="muted">
-              Entre 1 y 150 caracteres.
+              Entre 1 y 200 caracteres.
             </p>
           </div>
 

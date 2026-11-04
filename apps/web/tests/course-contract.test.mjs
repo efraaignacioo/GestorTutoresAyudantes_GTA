@@ -74,7 +74,7 @@ test("rechaza un nombre compuesto únicamente por espacios", () => {
         name: "   ",
         term: "2026-1",
       }),
-    /1 y 150/,
+    /1 y 200/,
   );
 });
 
@@ -82,7 +82,7 @@ test("acepta límites de caracteres permitidos y rechaza si se exceden", () => {
   assert.equal(
     createCourseInput({
       code: "A".repeat(20),
-      name: "B".repeat(150),
+      name: "B".repeat(200),
       term: "C".repeat(20),
     }).code.length,
     20,
@@ -100,9 +100,9 @@ test("acepta límites de caracteres permitidos y rechaza si se exceden", () => {
     () =>
       createCourseInput({
         code: "A",
-        name: "B".repeat(151),
+        name: "B".repeat(201),
         term: "C",
       }),
-    /1 y 150/,
+    /1 y 200/,
   );
 });
