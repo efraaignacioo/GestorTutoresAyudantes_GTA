@@ -1,4 +1,4 @@
-﻿Add-Type -AssemblyName System.Net.Http
+Add-Type -AssemblyName System.Net.Http
 $base = 'http://localhost:3000'
 
 function Test-Api {
