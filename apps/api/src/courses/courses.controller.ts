@@ -91,5 +91,4 @@ export class CoursesController {
   ) {
     return this.coursesService.remove(user.sub, id);
   }
-  
 }
